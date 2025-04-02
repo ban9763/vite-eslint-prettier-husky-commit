@@ -1,0 +1,44 @@
+# 定义一个名字
+name: deploy-website
+
+# 指定在 main 分支 push 时触发工作流
+on:
+  push:
+    branches: [main]
+
+# 定义任务
+jobs:
+  npm-build:
+    name: npm-build工作 # 任务名称
+    runs-on: ubuntu-latest # 指定运行任务的操作系统环境
+
+    # 定义任务的步骤
+    steps:
+      # 第一步：检出代码
+      - name: checkout code
+        uses: actions/checkout@v4.1.7 # 使用官方的 checkout 插件来检出代码
+
+      # 第二步：安装 Node.js
+      - name: install nodejs
+        uses: actions/setup-node@v4.0.3 # 使用官方的 setup-node 插件来安装 Node.js
+        with:
+          node-version: '20.x' # 指定 Node.js 的版本为 20.x
+
+      # 第三步：安装项目依赖
+      - name: install deps
+        run: npm install # 使用 npm 安装 package.json 中定义的依赖
+
+      # 第四步：构建应用
+      - name: build app
+        run: npm run build # 执行 npm 脚本来构建应用
+
+      # 第五步：通过 SSH 将构建后的文件上传到远程服务器
+      - name: copy dist file with ssh
+        uses: easingthemes/ssh-deploy@main # 使用 easingthemes/ssh-deploy 插件进行文件部署
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }} # 从 GitHub Secrets 中获取远程主机地址
+          REMOTE_USER: ${{ secrets.REMOTE_USER }} # 从 GitHub Secrets 中获取远程用户名
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }} # 从 GitHub Secrets 中获取 SSH 私钥
+          ARGS: '-avzr --delete' # 指定 rsync 的参数，启用压缩、递归、删除目标中多余文件等功能
+          SOURCE: './dist' # 指定本地源目录，即构建后的 dist 目录
+          TARGET: '/home/dist' # 指定远程服务器上的目标目录，需要提前创建
