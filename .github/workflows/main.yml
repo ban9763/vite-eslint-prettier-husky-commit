@@ -39,6 +39,6 @@ jobs:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }} # 从 GitHub Secrets 中获取远程主机地址
           REMOTE_USER: ${{ secrets.REMOTE_USER }} # 从 GitHub Secrets 中获取远程用户名
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }} # 从 GitHub Secrets 中获取 SSH 私钥
-          ARGS: '-avzr --delete --exclude=*.tmp -e "ssh -p 80"' # 指定 rsync 的参数，启用压缩、递归、删除目标中多余文件等功能
+          ARGS: '-avzr --delete' # 指定 rsync 的参数，启用压缩、递归、删除目标中多余文件等功能
           SOURCE: './dist' # 指定本地源目录，即构建后的 dist 目录
           TARGET: '/home/dist' # 指定远程服务器上的目标目录，需要提前创建
